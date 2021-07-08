@@ -1,0 +1,102 @@
+@startuml FPass Payment Providers
+skinparam maxMessageSize 100
+autonumber
+
+actor Cliente
+
+box FPASS
+participant FpassApp as "Application"
+participant FpassAPI as "API"
+end box
+
+box Payment Provider
+participant PaymentProviderApp as "Checkout App"
+participant PaymentProviderAPI as "API"
+end box
+
+group Iniciação de Pagamento
+  group Fpass WebApp
+    Cliente -> FpassApp: Escolhe
+    note left #FFAAAA50
+    Confirmação com
+    método de pagamento
+    end note
+    FpassApp -> FpassAPI: Registar pagamento
+    return
+    FpassApp -> PaymentProviderApp: Envia requisição
+    note left
+      **GET**
+      **https://{{PROVIDER_APP_URL}}**
+      **/data={{payload}}**
+      **Payload + x-api-key + x-hash**
+      ' {
+      '   instance: "{{uuidv4}}", //WhiteLabel
+      '   id: "{{uuidv4}}" //PaymentID
+      '   products: [
+      '     {
+      '       id: "{{uuidv4}}"
+      '       name: "Product Name"
+      '       amount: 10
+      '     }
+      '   ],
+      '   amount: 10
+      '   installments: 1
+      '   discount: 0
+      ' }
+    end note
+  end
+
+  group Provider App
+    Cliente -> PaymentProviderApp: Escolhe produto
+    note left #FFAAAA50
+    Tela de Produtos
+    end note
+  end
+
+end
+
+group Provider App - Checkout
+  PaymentProviderApp -> Cliente: Exibe dados de pagamendo
+  note left #FFAAAA50
+    Tela de Checkout
+    * Imagem do Produto
+    * Titulo do Produto
+    * Valor do Produto
+    * Titulo do Recebedor (Fpass ou WL)
+    * Selo de recebedor verificado
+    (Recebedor autorizado de pagamento)
+    * Numeração de Pedido
+    end note
+  Cliente --> PaymentProviderApp: Valida dados de pagamento exibidos
+  Cliente -> PaymentProviderApp: Autoriza pagamento
+  PaymentProviderApp -> PaymentProviderAPI: Requisita processamento
+  return
+  PaymentProviderApp --> Cliente: Exibe confirmação
+  note left #FFAAAA50
+    Tela de Confirmação
+    de Pagamento
+  end note
+  PaymentProviderAPI -> FpassAPI: Notifica confirmação
+  note right
+    **POST**
+    **https://{{FPASS_APP_URL}}**
+    **Payload + x-api-key + x-hash**
+  end note
+end
+
+group Email
+FpassAPI -> Cliente: Envia
+note left #FFAAAA50
+  Copy de pagamento
+  por email
+end note
+end
+group Notificação
+FpassAPI --> FpassApp: Envia Notificação
+FpassApp --> Cliente: Notifica
+note left #FFAAAA50
+    Notificação
+    de Pagamento
+  end note
+end
+@enduml
