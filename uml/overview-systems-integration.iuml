@@ -23,27 +23,21 @@ group Iniciação de Pagamento
     end note
     FpassApp -> FpassAPI: Registar pagamento
     return
-    FpassApp -> PaymentProviderApp: Envia requisição
+    FpassApp -> PaymentProviderApp: Checkout Forward
     note left
-      **GET**
-      **https://{{PROVIDER_APP_URL}}**
-      **/data={{payload}}**
-      **Payload + x-api-key + x-hash**
-      ' {
-      '   instance: "{{uuidv4}}", //WhiteLabel
-      '   id: "{{uuidv4}}" //PaymentID
-      '   products: [
-      '     {
-      '       id: "{{uuidv4}}"
-      '       name: "Product Name"
-      '       amount: 10
-      '     }
-      '   ],
-      '   amount: 10
-      '   installments: 1
-      '   discount: 0
-      ' }
+      **GET -> {schema}://{checkoutUrl}/{token}**
     end note
+    PaymentProviderApp -> FpassApp: Checkout Product Metadata
+    note left
+      **GET -> https://api.fpass.com.br/payment-provider/{token}**
+      **Payload + x-api-key**
+      {
+        id: "{{uuidv4}}"
+        name: "Product Name"
+        amount: 10
+      }
+    end note
+    return
   end
 
   group Provider App
@@ -80,7 +74,15 @@ group Provider App - Checkout
   note right
     **POST**
     **https://{{FPASS_APP_URL}}**
-    **Payload + x-api-key + x-hash**
+    **Payload + x-api-key**
+    {
+      "id": "{uuidv4}",
+      "type": "created | processing | failed | paid",
+      "token": "{token}",
+      "message": "string",
+      "date": "2022-10-22T23:51:12.832Z",
+      "hash": "67b69634f9880a282c14a0f0cb7ba20cf5d677e9"
+    }
   end note
 end
 
