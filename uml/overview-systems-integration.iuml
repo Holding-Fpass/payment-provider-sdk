@@ -73,7 +73,7 @@ group Provider App - Checkout
   PaymentProviderAPI -> FpassAPI: Notifica confirmação
   note right
     **POST**
-    **https://{{FPASS_APP_URL}}**
+    **https://api.fpass.com.br/webhook/{providerCode}**
     **Payload + x-api-key**
     {
       "id": "{uuidv4}",
