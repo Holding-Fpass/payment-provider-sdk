@@ -26,13 +26,13 @@ Após a conclusão do processo de cobrança deve haver uma notificação do even
 ```sh
 curl --location -g --request POST 'https://api.fpass.com.br/webhook/{providerCode}' \
 --header 'x-api-key: {uuidv4}' \
+--header 'x-hash: {object-hash with secret}' \
 --header 'Content-Type: application/json' \
 --data-raw '{
   "id":"{uuidv4}",
   "type": "created | processing | failed | paid",
   "token": "{token}",
   "message": "string",
-  "date": "2022-10-22T23:51:12.832Z",
-  "hash": "67b69634f9880a282c14a0f0cb7ba20cf5d677e9"
+  "date": "2022-10-22T23:51:12.832Z"
 }'
 ```
